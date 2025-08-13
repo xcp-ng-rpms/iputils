@@ -3,7 +3,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20160308
-Release: 10%{?dist}
+Release: 10.1%{?dist}
 # some parts are under the original BSD (ping.c)
 # some are under GPLv2+ (tracepath.c)
 License: BSD and GPLv2+
@@ -79,24 +79,8 @@ Node Information Query (RFC4620) daemon. Responds to IPv6 Node Information
 Queries.
 
 %prep
-%setup -q -a 1 -n %{name}-s%{version}
+%autosetup -a 1 -p1 -n %{name}-s%{version}
 
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
 
 %build
 %ifarch s390 s390x
@@ -204,6 +188,11 @@ mv -f RELNOTES.tmp RELNOTES
 %attr(644,root,root) %{_mandir}/man8/ninfod.8.gz
 
 %changelog
+* Tue Feb 10 2026 Philippe Coval <philippe.coval@vates.tech> - 20160308-10.1
+- Rebuild with openssl-3
+- Update obsolete patch macro with autosetup
+- Add gcc to BuildRequires
+
 * Mon May 22 2017 Jan Synáček <jsynacek@redhat.com> - 20160308-10
 - fix pmtu discovery for ipv6 (#1444281)
 
