@@ -1,0 +1,31 @@
+RHEL only.
+
+Resolves: #1317796
+
+From b2cc1e501531d5d66988ce8b6ab3e8a7b359f040 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20=C5=A0imerda?= <psimerda@redhat.com>
+Date: Mon, 21 Mar 2016 14:13:56 +0100
+Subject: [PATCH] rhel-7.3: keep good old IPv4 ping
+
+---
+ ping.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ping.c b/ping.c
+index 498c0e8..5474b9d 100644
+--- a/ping.c
++++ b/ping.c
+@@ -443,6 +443,10 @@ main(int argc, char **argv)
+ 
+ 	target = argv[argc-1];
+ 
++	/* RHEL-7.3 rebase: Disable the new dual-stack feature. */
++	if (hints.ai_family == AF_UNSPEC)
++		hints.ai_family = AF_INET;
++
+ 	/* Create sockets */
+ 	enable_capability_raw();
+ 	if (hints.ai_family != AF_INET6)
+-- 
+2.7.2
+

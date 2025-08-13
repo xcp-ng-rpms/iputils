@@ -1,0 +1,36 @@
+commit fd79cc90c4af117e3fa41466151cdd289e460569
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Fri Sep 9 08:52:45 2016 +0200
+
+    ping: fix ping -6 -I
+    
+    ping passes the device variable to ping6_common.c, but it's not visible
+    there.
+    
+    Original patch by Xin Long <lucien.xin@gmail.com>.
+
+diff --git a/ping.c b/ping.c
+index 34eb436..43acc2f 100644
+--- a/ping.c
++++ b/ping.c
+@@ -106,7 +106,7 @@ static struct {
+ int cmsg_len;
+ 
+ static struct sockaddr_in source = { .sin_family = AF_INET };
+-static char *device;
++char *device;
+ static int pmtudisc = -1;
+ 
+ static void create_socket(socket_st *sock, int family, int socktype, int protocol, int requisite)
+diff --git a/ping.h b/ping.h
+index 6f5d64c..749f3ff 100644
+--- a/ping.h
++++ b/ping.h
+@@ -167,6 +167,7 @@ extern volatile int exiting;
+ extern volatile int status_snapshot;
+ extern int confirm;
+ extern int confirm_flag;
++extern char *device;
+ 
+ extern volatile int in_pr_addr;		/* pr_addr() is executing */
+ extern jmp_buf pr_addr_jmp;

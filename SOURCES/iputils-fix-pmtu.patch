@@ -1,0 +1,63 @@
+Resolves: #1444281
+
+commit f3c189e26b3ba803b703d724e831e59390d0af13
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Mon May 15 12:07:59 2017 +0200
+
+    ping: fix pmtu discovery for ipv6
+    
+    Fixes: #40
+
+diff --git a/ping.c b/ping.c
+index 45cca8d..fade2c9 100644
+--- a/ping.c
++++ b/ping.c
+@@ -107,7 +107,7 @@ int cmsg_len;
+ 
+ static struct sockaddr_in source = { .sin_family = AF_INET };
+ char *device;
+-static int pmtudisc = -1;
++int pmtudisc = -1;
+ 
+ static void create_socket(socket_st *sock, int family, int socktype, int protocol, int requisite)
+ {
+@@ -498,8 +498,14 @@ main(int argc, char **argv)
+ 	enable_capability_raw();
+ 	if (hints.ai_family != AF_INET6)
+ 		create_socket(&sock4, AF_INET, hints.ai_socktype, IPPROTO_ICMP, hints.ai_family == AF_INET);
+-	if (hints.ai_family != AF_INET)
++	if (hints.ai_family != AF_INET) {
+ 		create_socket(&sock6, AF_INET6, hints.ai_socktype, IPPROTO_ICMPV6, sock4.fd == -1);
++		/* This may not be needed if both protocol versions always had the same value, but
++		 * since I don't know that, it's better to be safe than sorry. */
++		pmtudisc = pmtudisc == IP_PMTUDISC_DO   ? IPV6_PMTUDISC_DO :
++			   pmtudisc == IP_PMTUDISC_DONT ? IPV6_PMTUDISC_DONT :
++			   pmtudisc == IP_PMTUDISC_WANT ? IPV6_PMTUDISC_WANT : pmtudisc;
++	}
+ 	disable_capability_raw();
+ 
+ 	/* Limit address family on single-protocol systems */
+diff --git a/ping.h b/ping.h
+index 1253fa0..78e3853 100644
+--- a/ping.h
++++ b/ping.h
+@@ -168,6 +168,7 @@ extern volatile int status_snapshot;
+ extern int confirm;
+ extern int confirm_flag;
+ extern char *device;
++extern int pmtudisc;
+ 
+ extern volatile int in_pr_addr;		/* pr_addr() is executing */
+ extern jmp_buf pr_addr_jmp;
+diff --git a/ping6_common.c b/ping6_common.c
+index a5627ae..f5c81fd 100644
+--- a/ping6_common.c
++++ b/ping6_common.c
+@@ -101,7 +101,6 @@ void ping6_usage(unsigned) __attribute((noreturn));
+ 
+ struct sockaddr_in6 source6 = { .sin6_family = AF_INET6 };
+ char *device;
+-int pmtudisc=-1;
+ 
+ #if defined(USE_GCRYPT) || defined(USE_OPENSSL) || defined(USE_NETTLE)
+ #include "iputils_md5dig.h"

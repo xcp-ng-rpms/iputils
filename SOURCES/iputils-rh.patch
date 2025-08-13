@@ -1,0 +1,20 @@
+--- iputils-s20160308/Makefile	2016-03-08 13:58:56.000000000 +0100
++++ iputils-s20160308-new/Makefile	2016-03-09 10:09:02.295409179 +0100
+@@ -36,7 +36,7 @@ WITHOUT_IFADDRS=no
+ ARPING_DEFAULT_DEVICE=
+ 
+ # nettle library for ipv6 ping [yes|no|static]
+-USE_NETTLE=yes
++USE_NETTLE=no
+ # libgcrypt library for ipv6 ping [no|yes|static]
+ USE_GCRYPT=no
+ # Crypto library for ping6 [shared|static|no]
+@@ -53,7 +53,7 @@ ENABLE_RDISC_SERVER=no
+ # What a pity, all new gccs are buggy and -Werror does not work. Sigh.
+ # CFLAGS+=-fno-strict-aliasing -Wstrict-prototypes -Wall -Werror -g
+ CFLAGS?=-O3 -g
+-CFLAGS+=-fno-strict-aliasing -Wstrict-prototypes -Wall
++CFLAGS+=$(RPM_OPT_FLAGS) -fno-strict-aliasing -Wstrict-prototypes -Wall
+ CPPFLAGS+=-D_GNU_SOURCE
+ LDLIB=
+ 

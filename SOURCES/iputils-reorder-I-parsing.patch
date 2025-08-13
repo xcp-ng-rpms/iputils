@@ -1,0 +1,37 @@
+commit 1f6f39b84f81cfa6bc243557a68eebeeac7e8ea3
+Author: Robert Schiele <rschiele@gmail.com>
+Date:   Mon Mar 14 09:18:08 2016 +0100
+
+    reorder -I option parsing
+    
+    This changes -I option parsing in a way that device is only assigned
+    if neither an IPv4 nor an IPv6 address is detected.  Otherwise those
+    addresses are misinterpreted as device names and as such will cause
+    error messages later in the code.
+    
+    Signed-off-by: Robert Schiele <rschiele@gmail.com>
+
+diff --git a/ping.c b/ping.c
+index c42d6eb..498c0e8 100644
+--- a/ping.c
++++ b/ping.c
+@@ -279,10 +279,6 @@ main(int argc, char **argv)
+ 			break;
+ 		}
+ 		case 'I':
+-			if (inet_pton(AF_INET, optarg, &source.sin_addr) > 0)
+-				options |= F_STRICTSOURCE;
+-			else
+-				device = optarg;
+ 			/* IPv6 */
+ 			if (strchr(optarg, ':')) {
+ 				char *p, *addr = strdup(optarg);
+@@ -306,6 +302,8 @@ main(int argc, char **argv)
+ 				options |= F_STRICTSOURCE;
+ 
+ 				free(addr);
++			} else if (inet_pton(AF_INET, optarg, &source.sin_addr) > 0) {
++				options |= F_STRICTSOURCE;
+ 			} else {
+ 				device = optarg;
+ 			}
