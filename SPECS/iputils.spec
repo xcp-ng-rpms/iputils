@@ -34,6 +34,7 @@ Patch13: iputils-fix-ping-t-multicast.patch
 Patch14: iputils-arping-network-down.patch
 Patch15: iputils-fix-pmtu.patch
 
+BuildRequires: gcc
 BuildRequires: docbook-utils perl-SGMLSpm
 BuildRequires: glibc-kernheaders >= 2.4-8.19
 BuildRequires: libidn-devel
