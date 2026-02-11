@@ -1,0 +1,29 @@
+commit c5932dc918040504880258e777c9428331269291
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Wed Feb 22 10:29:33 2017 +0100
+
+    fix multicast setsockopt calls on big endian
+    
+    Originally reported at https://bugzilla.redhat.com/show_bug.cgi?id=1373333.
+
+diff --git a/ping.c b/ping.c
+index 6f67d2d..45cca8d 100644
+--- a/ping.c
++++ b/ping.c
+@@ -850,14 +850,14 @@ int ping4_run(int argc, char **argv, struct addrinfo *ai, socket_st *sock)
+ 
+ 	if (options & F_NOLOOP) {
+ 		int loop = 0;
+-		if (setsockopt(sock->fd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, 1) == -1) {
++		if (setsockopt(sock->fd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof loop) == -1) {
+ 			perror ("ping: can't disable multicast loopback");
+ 			exit(2);
+ 		}
+ 	}
+ 	if (options & F_TTL) {
+ 		int ittl = ttl;
+-		if (setsockopt(sock->fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, 1) == -1) {
++		if (setsockopt(sock->fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof ttl) == -1) {
+ 			perror ("ping: can't set multicast time-to-live");
+ 			exit(2);
+ 		}

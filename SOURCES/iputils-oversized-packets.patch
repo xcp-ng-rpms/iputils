@@ -1,0 +1,46 @@
+From 61ed3913790901f2ad4973de60b373150fde01e0 Mon Sep 17 00:00:00 2001
+From: Jan Synacek <jsynacek@redhat.com>
+Date: Wed, 20 Apr 2016 09:51:12 +0200
+Subject: [PATCH] ping: do not allow oversized packets to root
+
+The code later fails anyways (as the original comment suggests), which
+results in a weird recvmsg() loop that times out eventually.
+
+Reproducer:
+
+./ping -c 1 -s 65530 127.0.0.1
+---
+ ping.c | 10 ++--------
+ 1 file changed, 2 insertions(+), 8 deletions(-)
+
+diff --git a/ping.c b/ping.c
+index f435fe2..ea37c4f 100644
+--- a/ping.c
++++ b/ping.c
+@@ -80,8 +80,6 @@ ping_func_set_st ping4_func_set = {
+ #define	NROUTES		9		/* number of record route slots */
+ #define TOS_MAX		255		/* 8-bit TOS field */
+ 
+-static const int max_ping4_packet = 0x10000;
+-
+ static int ts_type;
+ static int nroute = 0;
+ static __u32 route[10];
+@@ -806,12 +804,8 @@ int ping4_run(int argc, char **argv, struct addrinfo *ai, socket_st *sock)
+ 	}
+ 
+ 	if (datalen > 0xFFFF - 8 - optlen - 20) {
+-		if (uid || datalen > max_ping4_packet-8 || datalen > MAXPACKET-8) {
+-			fprintf(stderr, "Error: packet size %d is too large. Maximum is %d\n", datalen, 0xFFFF-8-20-optlen);
+-			exit(2);
+-		}
+-		/* Allow small oversize to root yet. It will cause EMSGSIZE. */
+-		fprintf(stderr, "WARNING: packet size %d is too large. Maximum is %d\n", datalen, 0xFFFF-8-20-optlen);
++		fprintf(stderr, "Error: packet size %d is too large. Maximum is %d\n", datalen, 0xFFFF-8-20-optlen);
++		exit(2);
+ 	}
+ 
+ 	if (datalen >= sizeof(struct timeval))	/* can we time transfer */
+-- 
+2.7.4
+

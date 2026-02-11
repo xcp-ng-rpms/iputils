@@ -1,0 +1,10 @@
+[Unit]
+Description=Node Information Query Daemon
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/ninfod
+
+[Install]
+WantedBy=multi-user.target

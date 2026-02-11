@@ -1,0 +1,26 @@
+commit 6702a95f2ea1a6a5b7c94437a87c1be6d0677733
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Mon Sep 12 12:50:58 2016 +0200
+
+    ping: fix error message when getting EACCES from connect()
+    
+    According to man connect(2), EACCES can be set either when pinging a
+    broadcast address, or when a local firewall rule is in place.
+    
+    Easily reproduced by running "ip route add prohibit <ipaddr>" and then
+    trying to ping the address.
+
+diff --git a/ping.c b/ping.c
+index 34eb436..52b0f0e 100644
+--- a/ping.c
++++ b/ping.c
+@@ -655,7 +655,8 @@ int ping4_run(int argc, char **argv, struct addrinfo *ai, socket_st *sock)
+ 		if (connect(probe_fd, (struct sockaddr*)&dst, sizeof(dst)) == -1) {
+ 			if (errno == EACCES) {
+ 				if (broadcast_pings == 0) {
+-					fprintf(stderr, "Do you want to ping broadcast? Then -b\n");
++					fprintf(stderr,
++						"Do you want to ping broadcast? Then -b. If not, check your local firewall rules.\n");
+ 					exit(2);
+ 				}
+ 				fprintf(stderr, "WARNING: pinging broadcast address\n");
