@@ -3,7 +3,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20160308
-Release: 10.1%{?dist}
+Release: 10.1~XCPNG2710.3%{?dist}
 # some parts are under the original BSD (ping.c)
 # some are under GPLv2+ (tracepath.c)
 License: BSD and GPLv2+
