@@ -1,0 +1,20 @@
+commit df7d2d83345e2e547c2cb3a83d3a8a099339a742
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Fri Jan 6 13:28:04 2017 +0100
+
+    ping: prevent possible double free after cap_free()
+    
+    Original bugreport: https://bugzilla.redhat.com/show_bug.cgi?id=1410114
+
+diff --git a/ping_common.c b/ping_common.c
+index 0b32d6a..b0825e3 100644
+--- a/ping_common.c
++++ b/ping_common.c
+@@ -159,6 +159,7 @@ int modify_capability(cap_value_t cap, cap_flag_value_t on)
+ 	}
+ 
+ 	cap_free(cap_p);
++	cap_p = NULL;
+ 
+ 	rc = 0;
+ out:

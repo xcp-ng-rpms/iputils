@@ -1,0 +1,23 @@
+commit e25568f5e580d5631f533ae8474bcca40a011690
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Thu Aug 4 11:20:25 2016 +0200
+
+    correctly initialize first hop
+    
+    When the sin6_family was set to 0, the initial probe connect()
+    could have succeeded instead of failing.
+    
+    Fixes #57.
+
+diff --git a/ping6_common.c b/ping6_common.c
+index fa01292..d6965dc 100644
+--- a/ping6_common.c
++++ b/ping6_common.c
+@@ -805,6 +805,7 @@ int ping6_run(int argc, char **argv, struct addrinfo *ai, struct socket_st *sock
+ 			}
+ 			disable_capability_raw();
+ 		}
++		firsthop.sin6_family = AF_INET6;
+ 		firsthop.sin6_port = htons(1025);
+ 		if (connect(probe_fd, (struct sockaddr*)&firsthop, sizeof(firsthop)) == -1) {
+ 			perror("connect");

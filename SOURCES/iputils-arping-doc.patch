@@ -1,0 +1,24 @@
+The -I option is actually optional when a suitable device is found.
+
+--- iputils-s20160308/arping.c	2016-03-08 13:58:56.000000000 +0100
++++ iputils-s20160308-new/arping.c	2016-09-05 12:59:22.746617891 +0200
+@@ -1086,7 +1086,7 @@ main(int argc, char **argv)
+ 			fprintf(stderr, "arping: Device %s not available.\n", device.name);
+ 			exit(2);
+ 		}
+-		fprintf(stderr, "arping: device (option -I) is required.\n");
++		fprintf(stderr, "arping: Suitable device could not be determined. Please, use option -I.\n");
+ 		usage();
+ 	}
+ 
+--- iputils-s20160308/doc/arping.sgml	2016-03-08 13:58:56.000000000 +0100
++++ iputils-s20160308-new/doc/arping.sgml	2016-09-05 12:58:03.425799308 +0200
+@@ -19,7 +19,7 @@
+ <arg choice="opt">-c <replaceable/count/</arg>
+ <arg choice="opt">-w <replaceable/deadline/</arg>
+ <arg choice="opt">-s <replaceable/source/</arg>
+-<arg choice="req">-I <replaceable/interface/</arg>
++<arg choice="opt">-I <replaceable/interface/</arg>
+ <arg choice="req"><replaceable/destination/</arg>
+ </cmdsynopsis>
+ </refsynopsisdiv>

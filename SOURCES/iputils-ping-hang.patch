@@ -1,0 +1,48 @@
+commit 1c97ab2b9bf401d8c4db9f4f4a4e13e1002c2d64
+Author: Robert Schiele <rschiele@gmail.com>
+Date:   Mon Mar 14 08:59:56 2016 +0100
+
+    Revert "ping_common.c: fix message flood when EPERM is encountered in ping"
+    
+    This reverts commit a60ad56a18b660ea8158e6ce8d782fb0290329f8.
+    
+    The reason for this revert is that while the patch above fixed
+    https://bugzilla.redhat.com/show_bug.cgi?id=1061867 it had weird behavior
+    with other types of EPERM responses where it could end up in an endless
+    loop despite the fact that -c flag was specified.  In addition to that the
+    mentioned bug is also fixed with
+    commit 8b75f100bbc84aa32a2c35b54c53f48071af6e95
+    "ping: ICMP error replies while errno < 0 is a hard error"
+    by Jason A. Donenfeld <Jason@zx2c4.com>
+    such that this one should no longer be needed anyway.
+    
+    Signed-off-by: Robert Schiele <rschiele@gmail.com>
+
+diff --git a/ping_common.c b/ping_common.c
+index fe7d6e3..7ea1fb3 100644
+--- a/ping_common.c
++++ b/ping_common.c
+@@ -373,11 +373,10 @@ resend:
+ 	if (i > 0) {
+ 		/* Apparently, it is some fatal bug. */
+ 		abort();
+-	} else if (errno == ENOBUFS || errno == ENOMEM || errno == EPERM) {
++	} else if (errno == ENOBUFS || errno == ENOMEM) {
+ 		int nores_interval;
+ 
+-		/* Device queue overflow, OOM or operation not permitted.
+-		 * Packet is not sent. */
++		/* Device queue overflow or OOM. Packet is not sent. */
+ 		tokens = 0;
+ 		/* Slowdown. This works only in adaptive mode (option -A) */
+ 		rtt_addend += (rtt < 8*50000 ? rtt/8 : 50000);
+@@ -386,8 +385,7 @@ resend:
+ 		nores_interval = SCHINT(interval/2);
+ 		if (nores_interval > 500)
+ 			nores_interval = 500;
+-		if (errno != EPERM)
+-			oom_count++;
++		oom_count++;
+ 		if (oom_count*nores_interval < lingertime)
+ 			return nores_interval;
+ 		i = 0;

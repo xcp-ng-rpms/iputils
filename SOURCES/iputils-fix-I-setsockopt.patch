@@ -1,0 +1,25 @@
+Resolves: #1351540
+
+--- a/ping.c
++++ b/ping.c
+@@ -569,6 +569,7 @@ int ping4_run(int argc, char **argv, struct addrinfo *ai, socket_st *sock)
+ 			strncpy(ifr.ifr_name, device, IFNAMSIZ-1);
+ 
+ 			enable_capability_raw();
++			setsockopt(sock->fd, SOL_SOCKET, SO_BINDTODEVICE, device, strlen(device)+1);
+ 			rc = setsockopt(probe_fd, SOL_SOCKET, SO_BINDTODEVICE, device, strlen(device)+1);
+ 			disable_capability_raw();
+ 
+--- a/ping6_common.c
++++ b/ping6_common.c
+@@ -797,8 +797,10 @@ int ping6_run(int argc, char **argv, struct addrinfo *ai, struct socket_st *sock
+ 			enable_capability_raw();
+ 			if (
+ #ifdef IPV6_RECVPKTINFO
++			    setsockopt(sock->fd, IPPROTO_IPV6, IPV6_PKTINFO, &ipi, sizeof ipi) == -1 &&
+ 			    setsockopt(probe_fd, IPPROTO_IPV6, IPV6_PKTINFO, &ipi, sizeof ipi) == -1 &&
+ #endif
++			    setsockopt(sock->fd, SOL_SOCKET, SO_BINDTODEVICE, device, strlen(device)+1) == -1 &&
+ 			    setsockopt(probe_fd, SOL_SOCKET, SO_BINDTODEVICE, device, strlen(device)+1) == -1) {
+ 				perror("setsockopt(SO_BINDTODEVICE)");
+ 				exit(2);

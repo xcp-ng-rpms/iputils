@@ -1,0 +1,21 @@
+commit 66b793822d475bb40aa370c9ef7fc0499b22a5e2
+Author: Jan Synacek <jsynacek@redhat.com>
+Date:   Thu Feb 23 12:59:46 2017 +0100
+
+    arping: exit if network disappears while running
+    
+    Originally reported at https://bugzilla.redhat.com/show_bug.cgi?id=1387542
+
+diff --git a/arping.c b/arping.c
+index 1a3f40b..dce8f7b 100644
+--- a/arping.c
++++ b/arping.c
+@@ -1227,6 +1227,8 @@ main(int argc, char **argv)
+ 		if ((cc = recvfrom(s, packet, sizeof(packet), 0,
+ 				   (struct sockaddr *)&from, &alen)) < 0) {
+ 			perror("arping: recvfrom");
++			if (errno == ENETDOWN)
++				exit(2);
+ 			continue;
+ 		}
+ 
